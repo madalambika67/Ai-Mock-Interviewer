@@ -22,7 +22,7 @@ class Config:
         )
     else:
         os.makedirs(os.path.join(basedir, "instance"), exist_ok=True)
-        SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, "instance", "app.db")
+        SQLALCHEMY_DATABASE_URI = "sqlite:////tmp/app.db
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
