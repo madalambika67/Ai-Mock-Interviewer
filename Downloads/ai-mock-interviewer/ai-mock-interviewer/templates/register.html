@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Create account — Green Room{% endblock %}
+{% block content %}
+<div class="auth-shell">
+  <div class="auth-visual">
+    <a href="{{ url_for('auth.login') }}" class="brand"><span class="brand-mark"></span> Green Room</a>
+    <p class="auth-quote">Upload your resume, pick a role, and <span>walk in ready.</span></p>
+    <div class="auth-stat-row">
+      <div class="auth-stat"><b>AI</b><span>Answer scoring</span></div>
+      <div class="auth-stat"><b>STAR</b><span>Method feedback</span></div>
+      <div class="auth-stat"><b>Live</b><span>Progress tracking</span></div>
+    </div>
+  </div>
+  <div class="auth-form-side">
+    <div class="auth-form-box">
+      <h1>Create your account</h1>
+      <p>Set up your personal interview coach in under a minute.</p>
+      <form method="POST" action="{{ url_for('auth.register') }}">
+        <div class="field">
+          <label for="full_name">Full name</label>
+          <input type="text" id="full_name" name="full_name" required autofocus placeholder="Jordan Lee">
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required placeholder="At least 6 characters">
+        </div>
+        <div class="field">
+          <label for="confirm_password">Confirm password</label>
+          <input type="password" id="confirm_password" name="confirm_password" required placeholder="Repeat your password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Create account</button>
+      </form>
+      <p style="margin-top: 18px; font-size: 0.9rem;">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

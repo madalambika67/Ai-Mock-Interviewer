@@ -1,0 +1,128 @@
+{
+  "roles": {
+    "Software Engineer": {
+      "skills": ["python", "java", "data structures", "algorithms", "sql", "git", "oop", "system design", "rest api", "testing"],
+      "technical": {
+        "easy": [
+          "What is the difference between a list and a tuple in Python?",
+          "Explain the difference between == and === (or equivalent) in your preferred language.",
+          "What is a REST API and why is it used?",
+          "What is the difference between SQL and NoSQL databases?",
+          "Explain what Object-Oriented Programming is and name its four pillars."
+        ],
+        "medium": [
+          "Explain the time and space complexity of binary search and when you would use it.",
+          "How would you design a rate limiter for an API?",
+          "What is the difference between a process and a thread?",
+          "Explain normalization in databases with an example.",
+          "How do you handle exceptions and errors gracefully in production code?",
+          "Walk me through how a hash map works internally."
+        ],
+        "hard": [
+          "Design a URL shortening service like bit.ly. Walk through your architecture.",
+          "How would you scale a database that is struggling under heavy read traffic?",
+          "Explain how you would design a distributed cache.",
+          "Describe how you would debug a memory leak in a long-running service.",
+          "How would you design a system to handle millions of concurrent websocket connections?"
+        ]
+      },
+      "role_specific": {
+        "easy": ["What version control workflow do you follow in a team?", "What is CI/CD and why does it matter?"],
+        "medium": ["How do you approach writing unit tests for a new feature?", "Describe your process for reviewing a teammate's pull request."],
+        "hard": ["How would you migrate a monolith to microservices with zero downtime?", "Describe a time you had to make a difficult architectural trade-off."]
+      }
+    },
+    "Data Analyst": {
+      "skills": ["sql", "excel", "python", "power bi", "tableau", "statistics", "data visualization", "pandas"],
+      "technical": {
+        "easy": [
+          "What is the difference between INNER JOIN and LEFT JOIN in SQL?",
+          "What is the difference between mean, median and mode, and when would you use each?",
+          "What is data cleaning and why is it important?"
+        ],
+        "medium": [
+          "How would you identify and handle outliers in a dataset?",
+          "Explain the difference between correlation and causation with an example.",
+          "How would you design a dashboard for a sales team's weekly review?"
+        ],
+        "hard": [
+          "How would you design an A/B test to measure the impact of a new feature?",
+          "Walk me through how you would investigate a sudden drop in a key metric."
+        ]
+      },
+      "role_specific": {
+        "easy": ["What tools do you use for data visualization and why?"],
+        "medium": ["Describe a time your data analysis changed a business decision."],
+        "hard": ["How would you build a forecasting model for next quarter's revenue with limited historical data?"]
+      }
+    },
+    "Product Manager": {
+      "skills": ["roadmapping", "stakeholder management", "agile", "user research", "prioritization", "analytics", "communication"],
+      "technical": {
+        "easy": ["How do you prioritize features on a product roadmap?", "What is the difference between an epic, a story and a task?"],
+        "medium": ["Walk me through how you would launch a new feature end to end.", "How do you measure product-market fit?"],
+        "hard": ["How would you decide whether to build, buy, or partner for a new capability?", "Design a metrics framework for a two-sided marketplace."]
+      },
+      "role_specific": {
+        "easy": ["How do you gather and prioritize user feedback?"],
+        "medium": ["Describe how you handle disagreement between engineering and design."],
+        "hard": ["Describe a product you shipped that failed. What did you learn?"]
+      }
+    },
+    "General / Other": {
+      "skills": ["communication", "problem solving", "teamwork", "adaptability", "time management"],
+      "technical": {
+        "easy": ["Tell me about a tool or technology you learned recently.", "What does a typical workday look like for you?"],
+        "medium": ["Describe a complex problem you solved recently and how you approached it.", "How do you keep your skills up to date?"],
+        "hard": ["Describe the most technically challenging project you've worked on and your specific contribution."]
+      },
+      "role_specific": {
+        "easy": ["What interests you about this role?"],
+        "medium": ["How do you handle competing deadlines?"],
+        "hard": ["Describe a time you had to learn an entirely new domain quickly to deliver a project."]
+      }
+    }
+  },
+  "hr": {
+    "easy": [
+      "Tell me about yourself.",
+      "Why do you want to work with our company?",
+      "What are your strengths and weaknesses?",
+      "Where do you see yourself in five years?"
+    ],
+    "medium": [
+      "Why are you leaving your current role / why did you leave your last role?",
+      "What motivates you at work?",
+      "How do you handle stress and pressure?",
+      "What are your salary expectations?"
+    ],
+    "hard": [
+      "Tell me about a time you disagreed with your manager. How did you handle it?",
+      "Describe a professional failure and what you learned from it.",
+      "Why should we hire you over other candidates?"
+    ]
+  },
+  "behavioral": {
+    "easy": [
+      "Tell me about a time you worked successfully as part of a team.",
+      "Describe a situation where you had to meet a tight deadline."
+    ],
+    "medium": [
+      "Tell me about a time you had a conflict with a coworker and how you resolved it.",
+      "Describe a time you took initiative without being asked.",
+      "Tell me about a time you had to persuade someone to see things your way."
+    ],
+    "hard": [
+      "Describe a time you failed at something important. What did you do afterward?",
+      "Tell me about a time you had to make a decision with incomplete information.",
+      "Describe a time you had to give difficult feedback to someone."
+    ]
+  },
+  "follow_up_templates": [
+    "Can you elaborate on that with a specific example?",
+    "What was the measurable outcome or result of that?",
+    "What would you do differently if you faced that situation again?",
+    "Can you walk me through your thought process in more detail?",
+    "What was the biggest challenge in that situation and how did you overcome it?"
+  ]
+}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Your interview report — Green Room{% endblock %}
+{% block content %}
+{% set circumference = 464.96 %}
+{% set offset = circumference - (circumference * (interview.overall_score / 100)) %}
+<div class="container">
+  <div class="panel result-hero">
+    <div class="score-ring">
+      <svg width="168" height="168" viewBox="0 0 168 168">
+        <circle class="ring-bg" cx="84" cy="84" r="74" fill="none" stroke-width="12"/>
+        <circle class="ring-fg" cx="84" cy="84" r="74" fill="none" stroke-width="12"
+          stroke-dasharray="{{ circumference }}" stroke-dashoffset="{{ offset }}"/>
+      </svg>
+      <div class="score-ring-label">
+        <b>{{ interview.overall_score }}</b>
+        <span>OVERALL SCORE</span>
+      </div>
+    </div>
+    <div>
+      <h1>{{ interview.job_role }} interview report</h1>
+      <p>{{ interview.interview_type|capitalize }} interview, {{ interview.difficulty }} difficulty, {{ interview.questions|length }} questions answered on {{ interview.completed_at.strftime('%B %d, %Y') }}.</p>
+      <a href="{{ url_for('interview.setup') }}" class="btn btn-primary">Practice again</a>
+      <a href="{{ url_for('dashboard.home') }}" class="btn btn-secondary">Back to dashboard</a>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top: 10px;">Score breakdown</div>
+  <div class="dim-grid">
+    {% for label, value in [('Technical Accuracy', interview.technical_score), ('Relevance', interview.relevance_score), ('Communication', interview.communication_score), ('Clarity', interview.clarity_score), ('Confidence', interview.confidence_score), ('Completeness', interview.completeness_score)] %}
+    <div class="dim-card">
+      <div class="dim-label">{{ label }}</div>
+      <div class="dim-bar-track"><div class="dim-bar-fill" style="width: {{ value }}%;"></div></div>
+      <div class="dim-value">{{ value }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="insight-grid">
+    <div class="card">
+      <h3>Strengths</h3>
+      <ul class="insight-list good">
+        {% for s in strengths %}<li>{{ s }}</li>{% endfor %}
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Areas to improve</h3>
+      <ul class="insight-list bad">
+        {% for w in weaknesses %}<li>{{ w }}</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  {% if missing_skills %}
+  <div class="card" style="margin-bottom: 18px;">
+    <h3>Skills to reinforce</h3>
+    <p>These came up for this role but weren't clearly demonstrated in your answers.</p>
+    <div class="chip-row">
+      {% for skill in missing_skills %}<span class="chip">{{ skill }}</span>{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="insight-grid">
+    <div class="card">
+      <h3>Your improvement plan</h3>
+      <ul class="plan-list">
+        {% for step in improvement_plan %}<li>{{ step }}</li>{% endfor %}
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Recommended topics to study</h3>
+      <div class="chip-row" style="margin-bottom: 18px;">
+        {% for topic in recommended_topics %}<span class="chip">{{ topic }}</span>{% endfor %}
+      </div>
+      <h3>Practice questions</h3>
+      {% for pq in practice_questions %}
+      <div class="practice-q">{{ pq }}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

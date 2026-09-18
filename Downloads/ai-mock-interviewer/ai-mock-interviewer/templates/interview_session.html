@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% block title %}Interview in progress — Green Room{% endblock %}
+{% block content %}
+<div class="session-shell">
+  <div class="progress-track" id="progressTrack"></div>
+
+  <div class="interviewer-row">
+    <div class="interviewer-avatar">AI</div>
+    <div class="interviewer-meta">
+      <b>{{ interview.job_role }}</b> interview &middot;
+      <span id="questionCounter">Question 1</span> of {{ interview.questions|length }}
+    </div>
+  </div>
+
+  <div class="question-card" id="questionCard">
+    <div class="question-meta">
+      <span class="badge badge-mixed" id="categoryBadge">technical</span>
+      <span class="badge badge-mixed" id="difficultyBadge">medium</span>
+      {% if interview.timed_mode %}
+      <span class="timer-badge" id="timerBadge" style="margin-left:auto;">&#9201; <span id="timerValue">--</span>s</span>
+      {% endif %}
+    </div>
+    <div class="question-text" id="questionText">Loading question...</div>
+
+    <div style="margin-top: 26px;">
+      <div class="answer-modes">
+        <button type="button" class="mode-toggle" id="typeModeBtn">Type answer</button>
+        <button type="button" class="mode-toggle" id="voiceModeBtn">Speak answer</button>
+      </div>
+
+      <div id="typePanel">
+        <textarea id="answerText" rows="6" placeholder="Type your answer here..."></textarea>
+      </div>
+
+      <div id="voicePanel" class="hidden">
+        <div class="mic-button" id="micButton">
+          <span id="micIcon">&#127908;</span> <span id="micLabel">Tap to start speaking</span>
+        </div>
+        <textarea id="voiceTranscript" rows="4" placeholder="Your transcribed answer will appear here — you can edit it before submitting." style="margin-top: 12px;"></textarea>
+      </div>
+
+      <div class="follow-up-banner" id="followUpBanner"></div>
+      <div class="feedback-banner" id="feedbackBanner"></div>
+
+      <div class="session-actions">
+        <button type="button" class="btn btn-secondary" id="skipBtn">Skip question</button>
+        <button type="button" class="btn btn-primary btn-lg" id="submitBtn">Submit answer</button>
+        <button type="button" class="btn btn-primary btn-lg hidden" id="nextBtn">Next question</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const INTERVIEW_ID = {{ interview.id }};
+const QUESTIONS = {{ questions_json|safe }};
+const TIMED_MODE = {{ 'true' if interview.timed_mode else 'false' }};
+const SECONDS_PER_Q = {{ interview.seconds_per_question }};
+const REALISTIC_MODE = {{ 'true' if interview.realistic_mode else 'false' }};
+const DEFAULT_MODE = "{{ interview.mode }}";
+const SUBMIT_URL = base => `/interview/${INTERVIEW_ID}/answer`;
+const COMPLETE_URL = `/interview/${INTERVIEW_ID}/complete`;
+
+let currentIndex = 0;
+let currentMode = DEFAULT_MODE === 'voice' ? 'voice' : 'text';
+let questionStartTime = null;
+let timerInterval = null;
+let secondsRemaining = SECONDS_PER_Q;
+let answeredAlready = false;
+let awaitingFollowUp = false;
+
+const progressTrack = document.getElementById('progressTrack');
+const questionText = document.getElementById('questionText');
+const categoryBadge = document.getElementById('categoryBadge');
+const difficultyBadge = document.getElementById('difficultyBadge');
+const questionCounter = document.getElementById('questionCounter');
+const answerText = document.getElementById('answerText');
+const voiceTranscript = document.getElementById('voiceTranscript');
+const followUpBanner = document.getElementById('followUpBanner');
+const feedbackBanner = document.getElementById('feedbackBanner');
+const submitBtn = document.getElementById('submitBtn');
+const nextBtn = document.getElementById('nextBtn');
+const skipBtn = document.getElementById('skipBtn');
+const typeModeBtn = document.getElementById('typeModeBtn');
+const voiceModeBtn = document.getElementById('voiceModeBtn');
+const typePanel = document.getElementById('typePanel');
+const voicePanel = document.getElementById('voicePanel');
+const micButton = document.getElementById('micButton');
+const micLabel = document.getElementById('micLabel');
+
+function buildProgressTrack() {
+  progressTrack.innerHTML = '';
+  QUESTIONS.forEach((q, i) => {
+    const seg = document.createElement('div');
+    seg.className = 'progress-seg';
+    seg.id = `seg-${i}`;
+    progressTrack.appendChild(seg);
+  });
+}
+
+function updateProgressTrack() {
+  QUESTIONS.forEach((q, i) => {
+    const seg = document.getElementById(`seg-${i}`);
+    seg.classList.remove('done', 'current');
+    if (i < currentIndex) seg.classList.add('done');
+    else if (i === currentIndex) seg.classList.add('current');
+  });
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  typeModeBtn.classList.toggle('active', mode === 'text');
+  voiceModeBtn.classList.toggle('active', mode === 'voice');
+  typePanel.classList.toggle('hidden', mode !== 'text');
+  voicePanel.classList.toggle('hidden', mode !== 'voice');
+}
+
+typeModeBtn.addEventListener('click', () => setMode('text'));
+voiceModeBtn.addEventListener('click', () => setMode('voice'));
+
+function speak(text) {
+  if (!REALISTIC_MODE || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.98;
+  window.speechSynthesis.speak(utter);
+}
+
+function loadQuestion(index) {
+  const q = QUESTIONS[index];
+  questionText.textContent = q.text;
+  categoryBadge.textContent = q.category;
+  categoryBadge.className = 'badge badge-' + q.category;
+  difficultyBadge.textContent = q.difficulty;
+  questionCounter.textContent = `Question ${index + 1}`;
+  answerText.value = '';
+  voiceTranscript.value = '';
+  followUpBanner.style.display = 'none';
+  feedbackBanner.style.display = 'none';
+  submitBtn.classList.remove('hidden');
+  nextBtn.classList.add('hidden');
+  answeredAlready = false;
+  awaitingFollowUp = false;
+  submitBtn.textContent = 'Submit answer';
+  updateProgressTrack();
+  questionStartTime = Date.now();
+  speak(q.text);
+
+  if (TIMED_MODE) startTimer();
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  secondsRemaining = SECONDS_PER_Q;
+  const timerValue = document.getElementById('timerValue');
+  const timerBadge = document.getElementById('timerBadge');
+  timerValue.textContent = secondsRemaining;
+  timerBadge.classList.remove('warning');
+  timerInterval = setInterval(() => {
+    secondsRemaining -= 1;
+    timerValue.textContent = Math.max(secondsRemaining, 0);
+    if (secondsRemaining <= 15) timerBadge.classList.add('warning');
+    if (secondsRemaining <= 0) {
+      clearInterval(timerInterval);
+      if (!answeredAlready) submitAnswer();
+    }
+  }, 1000);
+}
+
+function getCurrentAnswerText() {
+  return currentMode === 'voice' ? voiceTranscript.value.trim() : answerText.value.trim();
+}
+
+function submitAnswer() {
+  if (answeredAlready) return;
+  answeredAlready = true;
+  clearInterval(timerInterval);
+  const text = getCurrentAnswerText();
+  const timeTaken = Math.round((Date.now() - questionStartTime) / 1000);
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Analyzing...';
+
+  fetch(SUBMIT_URL(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      order_index: currentIndex, answer_text: text, time_taken: timeTaken,
+      input_mode: currentMode, is_follow_up_response: awaitingFollowUp,
+    }),
+  })
+  .then(r => r.json())
+  .then(data => renderFeedback(data))
+  .catch(() => {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit answer';
+    answeredAlready = false;
+  });
+}
+
+function renderFeedback(data) {
+  submitBtn.disabled = false;
+  feedbackBanner.style.display = 'block';
+  let breakdownHtml = Object.entries(data.breakdown).map(([k, v]) =>
+    `<span class="mini-chip">${k}: ${v}</span>`).join('');
+  feedbackBanner.innerHTML = `
+    <div class="feedback-score-row"><span class="fscore">${data.score}</span><span class="text-muted">/ 100 for this answer</span></div>
+    <div>${data.feedback}</div>
+    <div class="mini-breakdown">${breakdownHtml}</div>
+  `;
+
+  if (data.follow_up && !awaitingFollowUp) {
+    awaitingFollowUp = true;
+    answeredAlready = false;
+    followUpBanner.style.display = 'block';
+    followUpBanner.innerHTML = `<strong>Quick follow-up:</strong> ${data.follow_up}`;
+    if (currentMode === 'voice') { voiceTranscript.value = ''; } else { answerText.value = ''; }
+    submitBtn.textContent = 'Submit follow-up';
+    speak(data.follow_up);
+  } else {
+    submitBtn.classList.add('hidden');
+    nextBtn.classList.remove('hidden');
+  }
+}
+
+submitBtn.addEventListener('click', submitAnswer);
+skipBtn.addEventListener('click', () => {
+  if (answeredAlready) return;
+  awaitingFollowUp = false;
+  if (currentMode === 'voice') voiceTranscript.value = ''; else answerText.value = '';
+  submitAnswer();
+});
+
+nextBtn.addEventListener('click', () => {
+  if (currentIndex < QUESTIONS.length - 1) {
+    currentIndex += 1;
+    loadQuestion(currentIndex);
+  } else {
+    finishInterview();
+  }
+});
+
+function finishInterview() {
+  nextBtn.disabled = true;
+  nextBtn.textContent = 'Generating your report...';
+  fetch(COMPLETE_URL, { method: 'POST' })
+    .then(r => r.json())
+    .then(data => { window.location.href = data.redirect; });
+}
+
+// ---- Voice input (Web Speech API) ----
+let recognition = null;
+let isRecording = false;
+const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (SpeechRecognitionCtor) {
+  recognition = new SpeechRecognitionCtor();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onresult = (event) => {
+    let finalTranscript = voiceTranscript.dataset.base || '';
+    let interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) finalTranscript += transcript + ' ';
+      else interim += transcript;
+    }
+    voiceTranscript.dataset.base = finalTranscript;
+    voiceTranscript.value = (finalTranscript + interim).trim();
+  };
+
+  recognition.onend = () => {
+    if (isRecording) recognition.start(); // keep listening until user stops
+  };
+} else {
+  micLabel.textContent = 'Voice input not supported in this browser — try Chrome, or type your answer instead.';
+  micButton.style.cursor = 'not-allowed';
+}
+
+micButton.addEventListener('click', () => {
+  if (!SpeechRecognitionCtor) return;
+  if (!isRecording) {
+    voiceTranscript.dataset.base = voiceTranscript.value ? voiceTranscript.value + ' ' : '';
+    isRecording = true;
+    micButton.classList.add('recording');
+    micLabel.textContent = 'Listening... tap to stop';
+    recognition.start();
+  } else {
+    isRecording = false;
+    micButton.classList.remove('recording');
+    micLabel.textContent = 'Tap to start speaking';
+    recognition.stop();
+  }
+});
+
+// ---- Init ----
+buildProgressTrack();
+setMode(currentMode);
+loadQuestion(0);
+window.addEventListener('beforeunload', () => { if (window.speechSynthesis) window.speechSynthesis.cancel(); });
+</script>
+{% endblock %}

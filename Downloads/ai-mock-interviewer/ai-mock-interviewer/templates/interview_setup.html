@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}New interview — Green Room{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-head">
+    <div>
+      <h1>Set up your session</h1>
+      <p class="mb-0">Upload a resume for personalized questions, or jump straight into a role-based mock interview.</p>
+    </div>
+  </div>
+
+  <form method="POST" action="{{ url_for('interview.setup') }}" enctype="multipart/form-data" id="setupForm">
+    <div class="setup-grid">
+      <div>
+        <div class="panel" style="margin-bottom: 20px;">
+          <div class="section-label">Resume (optional)</div>
+          <label class="upload-drop" id="dropLabel" for="resume_file">
+            <div>Click to upload your resume</div>
+            <div class="field-hint">PDF, DOCX, or TXT — used to tailor questions to your actual skills</div>
+            <div class="filename" id="fileNameDisplay"></div>
+          </label>
+          <input type="file" id="resume_file" name="resume_file" accept=".pdf,.docx,.txt" style="display:none;">
+
+          <div class="field" style="margin-top: 18px;">
+            <label for="job_description">Paste a job description (optional)</label>
+            <textarea id="job_description" name="job_description" placeholder="Paste the job posting to get a resume-match score and more targeted questions..."></textarea>
+          </div>
+
+          {% if recent_resumes %}
+          <div class="field-hint">You've uploaded {{ recent_resumes|length }} resume(s) before. Uploading a new one here will be used for this session.</div>
+          {% endif %}
+        </div>
+
+        <div class="panel" style="margin-bottom: 20px;">
+          <div class="section-label">Job role</div>
+          <div class="select-cards">
+            {% for role in roles %}
+            <label class="select-card">
+              <input type="radio" name="job_role" value="{{ role }}" {% if loop.first %}checked{% endif %}>
+              <div class="select-card-body">{{ role }}</div>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="panel" style="margin-bottom: 20px;">
+          <div class="section-label">Interview type</div>
+          <div class="select-cards">
+            <label class="select-card"><input type="radio" name="interview_type" value="mixed" checked><div class="select-card-body">Mixed</div></label>
+            <label class="select-card"><input type="radio" name="interview_type" value="technical"><div class="select-card-body">Technical</div></label>
+            <label class="select-card"><input type="radio" name="interview_type" value="hr"><div class="select-card-body">HR</div></label>
+            <label class="select-card"><input type="radio" name="interview_type" value="behavioral"><div class="select-card-body">Behavioral</div></label>
+            <label class="select-card"><input type="radio" name="interview_type" value="role-specific"><div class="select-card-body">Role-specific</div></label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-label">Difficulty</div>
+          <div class="select-cards" style="margin-bottom: 20px;">
+            <label class="select-card"><input type="radio" name="difficulty" value="easy"><div class="select-card-body">Easy</div></label>
+            <label class="select-card"><input type="radio" name="difficulty" value="medium" checked><div class="select-card-body">Medium</div></label>
+            <label class="select-card"><input type="radio" name="difficulty" value="hard"><div class="select-card-body">Hard</div></label>
+          </div>
+
+          <div class="section-label">Answer mode</div>
+          <div class="select-cards" style="margin-bottom: 20px;">
+            <label class="select-card"><input type="radio" name="mode" value="text" checked><div class="select-card-body">Type answers</div></label>
+            <label class="select-card"><input type="radio" name="mode" value="voice"><div class="select-card-body">Speak answers</div></label>
+          </div>
+
+          <div class="field">
+            <label for="num_questions">Number of questions</label>
+            <select id="num_questions" name="num_questions">
+              <option value="4">4 (quick round)</option>
+              <option value="6" selected>6 (standard)</option>
+              <option value="8">8 (full session)</option>
+              <option value="10">10 (deep dive)</option>
+            </select>
+          </div>
+
+          <div class="checkbox-row">
+            <input type="checkbox" id="timed_mode" name="timed_mode">
+            <div class="checkbox-label">
+              <strong>Timed mode</strong>
+              <span>Each question gets a countdown, like a real interview</span>
+            </div>
+          </div>
+          <div class="field" id="secondsField" style="display:none;">
+            <label for="seconds_per_question">Seconds per question</label>
+            <select id="seconds_per_question" name="seconds_per_question">
+              <option value="60">60 seconds</option>
+              <option value="90" selected>90 seconds</option>
+              <option value="120">120 seconds</option>
+              <option value="180">180 seconds</option>
+            </select>
+          </div>
+
+          <div class="checkbox-row">
+            <input type="checkbox" id="realistic_mode" name="realistic_mode">
+            <div class="checkbox-label">
+              <strong>Realistic interviewer mode</strong>
+              <span>Questions are read aloud by the AI interviewer using voice</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel" style="position: sticky; top: 90px;">
+          <h3>Ready when you are</h3>
+          <p>Your AI interviewer will ask questions one at a time, analyze each answer for technical accuracy, relevance, communication, clarity, confidence and completeness, and may ask a natural follow-up if an answer feels thin.</p>
+          <ul class="summary-list">
+            <li><span>Feedback</span><span>After every answer</span></li>
+            <li><span>Follow-ups</span><span>Automatic, when needed</span></li>
+            <li><span>Final report</span><span>Scorecard + improvement plan</span></li>
+          </ul>
+          <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 18px;">Begin interview</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const fileInput = document.getElementById('resume_file');
+  const fileNameDisplay = document.getElementById('fileNameDisplay');
+  fileInput.addEventListener('change', () => {
+    fileNameDisplay.textContent = fileInput.files.length ? fileInput.files[0].name : '';
+  });
+
+  const timedCheckbox = document.getElementById('timed_mode');
+  const secondsField = document.getElementById('secondsField');
+  timedCheckbox.addEventListener('change', () => {
+    secondsField.style.display = timedCheckbox.checked ? 'block' : 'none';
+  });
+</script>
+{% endblock %}

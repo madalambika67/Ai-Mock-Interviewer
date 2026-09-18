@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}AI Mock Interviewer{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%23E8A23D%22/></svg>">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {% if current_user.is_authenticated %}
+  <nav class="topnav">
+    <div class="topnav-inner">
+      <a href="{{ url_for('dashboard.home') }}" class="brand">
+        <span class="brand-mark"></span> Green Room
+      </a>
+      <div class="nav-links">
+        <a href="{{ url_for('dashboard.home') }}" class="nav-link {% if request.endpoint == 'dashboard.home' %}active{% endif %}">Dashboard</a>
+        <a href="{{ url_for('interview.setup') }}" class="nav-link {% if request.endpoint == 'interview.setup' %}active{% endif %}">New Interview</a>
+      </div>
+      <div class="nav-user">
+        <span>{{ current_user.full_name }}</span>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm">Log out</a>
+      </div>
+    </div>
+  </nav>
+  {% endif %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-wrap">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+
+  <div class="footer-note">Green Room, AI Mock Interviewer. Built {{ current_year }}.</div>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

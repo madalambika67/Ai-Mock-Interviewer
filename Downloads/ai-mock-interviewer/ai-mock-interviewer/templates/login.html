@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Log in — Green Room{% endblock %}
+{% block content %}
+<div class="auth-shell">
+  <div class="auth-visual">
+    <a href="{{ url_for('auth.login') }}" class="brand"><span class="brand-mark"></span> Green Room</a>
+    <p class="auth-quote">The interview starts before you walk in. <span>Practice here first.</span></p>
+    <div class="auth-stat-row">
+      <div class="auth-stat"><b>4</b><span>Interview types</span></div>
+      <div class="auth-stat"><b>6</b><span>Scoring dimensions</span></div>
+      <div class="auth-stat"><b>&infin;</b><span>Practice rounds</span></div>
+    </div>
+  </div>
+  <div class="auth-form-side">
+    <div class="auth-form-box">
+      <h1>Welcome back</h1>
+      <p>Log in to pick up where you left off.</p>
+      <form method="POST" action="{{ url_for('auth.login') }}">
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required autofocus placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Log in</button>
+      </form>
+      <p style="margin-top: 18px; font-size: 0.9rem;">New here? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
