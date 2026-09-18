@@ -1,1005 +1,146 @@
 {% extends "base.html" %}
-
 {% block title %}Dashboard — Green Room{% endblock %}
-
 {% block content %}
-
-<div class="container dashboard-page">
-
-    <!-- =========================================
-         PAGE HEADER
-    ========================================== -->
-
-    <div class="page-head dashboard-header">
-
-        <div class="page-title-area">
-
-            <span class="eyebrow">
-                PERFORMANCE DASHBOARD
-            </span>
-
-            <h1>Your Progress</h1>
-
-            <p>
-                Every session sharpens the next one.
-                Track your interview performance and build confidence.
-            </p>
-
-        </div>
-
-        <a href="{{ url_for('interview.setup') }}"
-           class="btn btn-primary btn-lg start-interview-btn">
-
-            <span>＋</span>
-            Start New Interview
-
-        </a>
-
+<div class="container">
+  <div class="page-head">
+    <div>
+      <h1>Your progress</h1>
+      <p class="mb-0">Every session sharpens the next one. Here's how you're trending.</p>
     </div>
+    <a href="{{ url_for('interview.setup') }}" class="btn btn-primary btn-lg">Start new interview</a>
+  </div>
 
-
-    <!-- =========================================
-         STAT CARDS
-    ========================================== -->
-
-    <div class="stat-grid">
-
-        <!-- Completed -->
-
-        <div class="stat-card">
-
-            <div class="stat-card-top">
-
-                <div class="stat-label">
-                    INTERVIEWS COMPLETED
-                </div>
-
-                <div class="stat-icon blue-icon">
-                    ✓
-                </div>
-
-            </div>
-
-            <div class="stat-value">
-                {{ total }}
-            </div>
-
-            <div class="stat-description">
-                Completed mock interviews
-            </div>
-
-            <div class="stat-decoration"></div>
-
-        </div>
-
-
-        <!-- Average -->
-
-        <div class="stat-card">
-
-            <div class="stat-card-top">
-
-                <div class="stat-label">
-                    AVERAGE SCORE
-                </div>
-
-                <div class="stat-icon gold-icon">
-                    ★
-                </div>
-
-            </div>
-
-            <div class="stat-value accent">
-                {{ avg_score }}
-            </div>
-
-            <div class="stat-description">
-                Across all interviews
-            </div>
-
-            <div class="stat-decoration"></div>
-
-        </div>
-
-
-        <!-- Best -->
-
-        <div class="stat-card">
-
-            <div class="stat-card-top">
-
-                <div class="stat-label">
-                    BEST SCORE
-                </div>
-
-                <div class="stat-icon teal-icon">
-                    ↑
-                </div>
-
-            </div>
-
-            <div class="stat-value teal">
-                {{ best_score }}
-            </div>
-
-            <div class="stat-description">
-                Your highest performance
-            </div>
-
-            <div class="stat-decoration"></div>
-
-        </div>
-
-
-        <!-- In progress -->
-
-        <div class="stat-card">
-
-            <div class="stat-card-top">
-
-                <div class="stat-label">
-                    IN PROGRESS
-                </div>
-
-                <div class="stat-icon purple-icon">
-                    ●
-                </div>
-
-            </div>
-
-            <div class="stat-value">
-                {{ in_progress }}
-            </div>
-
-            <div class="stat-description">
-                Interviews waiting to finish
-            </div>
-
-            <div class="stat-decoration"></div>
-
-        </div>
-
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-label">Interviews completed</div>
+      <div class="stat-value">{{ total }}</div>
     </div>
-
-
-    <!-- =========================================
-         EMPTY STATE
-    ========================================== -->
-
-    {% if total == 0 %}
-
-    <div class="panel empty-state">
-
-        <div class="empty-icon">
-            ✦
-        </div>
-
-        <span class="eyebrow">
-            GET STARTED
-        </span>
-
-        <h3>
-            No completed interviews yet
-        </h3>
-
-        <p>
-            Run your first mock interview to unlock your
-            performance dashboard, skill breakdown,
-            and progress charts.
-        </p>
-
-        <a href="{{ url_for('interview.setup') }}"
-           class="btn btn-primary">
-
-            Start Your First Interview
-
-        </a>
-
+    <div class="stat-card">
+      <div class="stat-label">Average score</div>
+      <div class="stat-value accent">{{ avg_score }}</div>
     </div>
-
-
-    {% else %}
-
-
-    <!-- =========================================
-         CHARTS
-    ========================================== -->
-
-    <div class="chart-grid">
-
-
-        <!-- SCORE TREND -->
-
-        <div class="card chart-card">
-
-            <div class="chart-heading">
-
-                <div>
-
-                    <span class="chart-label">
-                        PERFORMANCE
-                    </span>
-
-                    <h3>
-                        Score Trend
-                    </h3>
-
-                    <p>
-                        Your overall interview performance
-                    </p>
-
-                </div>
-
-                <div class="chart-badge">
-                    0–100
-                </div>
-
-            </div>
-
-
-            <div class="chart-container">
-
-                <canvas id="trendChart"></canvas>
-
-            </div>
-
-        </div>
-
-
-        <!-- SKILL RADAR -->
-
-        <div class="card chart-card">
-
-            <div class="chart-heading">
-
-                <div>
-
-                    <span class="chart-label">
-                        SKILLS
-                    </span>
-
-                    <h3>
-                        Skill-wise Average
-                    </h3>
-
-                    <p>
-                        Your performance across key skills
-                    </p>
-
-                </div>
-
-                <div class="chart-badge">
-                    AI
-                </div>
-
-            </div>
-
-
-            <div class="chart-container radar-container">
-
-                <canvas id="radarChart"></canvas>
-
-            </div>
-
-        </div>
-
+    <div class="stat-card">
+      <div class="stat-label">Best score</div>
+      <div class="stat-value teal">{{ best_score }}</div>
     </div>
-
-
-    <!-- =========================================
-         INTERVIEW HISTORY
-    ========================================== -->
-
-    <div class="card history-card">
-
-        <div class="history-heading">
-
-            <div>
-
-                <span class="chart-label">
-                    HISTORY
-                </span>
-
-                <h3>
-                    Interview History
-                </h3>
-
-                <p>
-                    Review your previous mock interview sessions
-                </p>
-
-            </div>
-
-            <div class="history-count">
-
-                {{ total }} session{% if total != 1 %}s{% endif %}
-
-            </div>
-
-        </div>
-
-
-        <div class="history-table-wrapper">
-
-            <table class="history-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            DATE
-                        </th>
-
-                        <th>
-                            ROLE
-                        </th>
-
-                        <th>
-                            TYPE
-                        </th>
-
-                        <th>
-                            DIFFICULTY
-                        </th>
-
-                        <th>
-                            SCORE
-                        </th>
-
-                        <th>
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                    {% for i in interviews %}
-
-                    <tr>
-
-                        <!-- DATE -->
-
-                        <td>
-
-                            <div class="date-cell">
-
-                                <span class="date-main">
-                                    {{ i.completed_at.strftime('%b %d, %Y') }}
-                                </span>
-
-                            </div>
-
-                        </td>
-
-
-                        <!-- ROLE -->
-
-                        <td>
-
-                            <span class="role-name">
-                                {{ i.job_role }}
-                            </span>
-
-                        </td>
-
-
-                        <!-- TYPE -->
-
-                        <td>
-
-                            <span class="badge badge-{{ i.interview_type }}">
-                                {{ i.interview_type }}
-                            </span>
-
-                        </td>
-
-
-                        <!-- DIFFICULTY -->
-
-                        <td>
-
-                            <span class="difficulty">
-                                {{ i.difficulty }}
-                            </span>
-
-                        </td>
-
-
-                        <!-- SCORE -->
-
-                        <td>
-
-                            <span class="score-pill
-                                {% if i.overall_score >= 75 %}
-                                    score-high
-                                {% elif i.overall_score >= 50 %}
-                                    score-mid
-                                {% else %}
-                                    score-low
-                                {% endif %}
-                            ">
-
-                                {{ i.overall_score }}
-
-                            </span>
-
-                        </td>
-
-
-                        <!-- REPORT -->
-
-                        <td class="action-cell">
-
-                            <a href="{{ url_for('interview.results', interview_id=i.id) }}"
-                               class="btn btn-ghost btn-sm">
-
-                                View Report
-                                <span>→</span>
-
-                            </a>
-
-                        </td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
+    <div class="stat-card">
+      <div class="stat-label">In progress</div>
+      <div class="stat-value">{{ in_progress }}</div>
     </div>
+  </div>
 
-    {% endif %}
+  {% if total == 0 %}
+  <div class="panel empty-state">
+    <h3>No completed interviews yet</h3>
+    <p style="margin: 0 auto 20px;">Run your first mock interview to unlock your performance dashboard, skill breakdown, and progress charts.</p>
+    <a href="{{ url_for('interview.setup') }}" class="btn btn-primary">Start your first interview</a>
+  </div>
+  {% else %}
+  <div class="chart-grid">
+    <div class="card chart-card">
+      <h3>Score trend</h3>
+      <canvas id="trendChart"></canvas>
+    </div>
+    <div class="card chart-card">
+      <h3>Skill-wise average</h3>
+      <canvas id="radarChart"></canvas>
+    </div>
+  </div>
 
+  <div class="card card-flush">
+    <div style="padding: 22px 22px 0;"><h3>Interview history</h3></div>
+    <div style="overflow-x: auto;">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Date</th><th>Role</th><th>Type</th><th>Difficulty</th><th>Overall score</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in interviews %}
+          <tr>
+            <td>{{ i.completed_at.strftime('%b %d, %Y') }}</td>
+            <td>{{ i.job_role }}</td>
+            <td><span class="badge badge-{{ i.interview_type }}">{{ i.interview_type }}</span></td>
+            <td>{{ i.difficulty }}</td>
+            <td>
+              <span class="score-pill {% if i.overall_score >= 75 %}score-high{% elif i.overall_score >= 50 %}score-mid{% else %}score-low{% endif %}">
+                {{ i.overall_score }}
+              </span>
+            </td>
+            <td><a href="{{ url_for('interview.results', interview_id=i.id) }}" class="btn btn-ghost btn-sm">View report</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
 </div>
-
 {% endblock %}
 
-
 {% block scripts %}
-
 {% if total > 0 %}
-
-<!-- =========================================
-     CHART.JS
-========================================== -->
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <script>
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    console.log("Green Room dashboard loaded");
-
-    console.log(
-        "Chart.js:",
-        typeof Chart
-    );
-
-
-    /* =========================================
-       LOAD ANALYTICS
-    ========================================== */
-
-    fetch("{{ url_for('dashboard.analytics_data') }}")
-
-        .then(function(response) {
-
-            console.log(
-                "Analytics response:",
-                response.status
-            );
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "Analytics API failed: " +
-                    response.status
-                );
-
-            }
-
-            return response.json();
-
-        })
-
-
-        .then(function(data) {
-
-            console.log(
-                "Analytics data:",
-                data
-            );
-
-
-            /* =====================================
-               COLORS
-            ====================================== */
-
-            const textColor = "#A9B5C9";
-
-            const gridColor =
-                "rgba(148,163,184,0.10)";
-
-            const blue =
-                "#4F8CFF";
-
-            const blueLight =
-                "#60A5FA";
-
-            const gold =
-                "#D6B36A";
-
-
-            /* =====================================
-               SCORE TREND CHART
-            ====================================== */
-
-            const trendCanvas =
-                document.getElementById(
-                    "trendChart"
-                );
-
-
-            if (trendCanvas) {
-
-                const ctx =
-                    trendCanvas.getContext("2d");
-
-
-                /* Gradient */
-
-                const gradient =
-                    ctx.createLinearGradient(
-                        0,
-                        0,
-                        0,
-                        300
-                    );
-
-
-                gradient.addColorStop(
-                    0,
-                    "rgba(79,140,255,0.30)"
-                );
-
-
-                gradient.addColorStop(
-                    1,
-                    "rgba(79,140,255,0.01)"
-                );
-
-
-                new Chart(ctx, {
-
-                    type: "line",
-
-                    data: {
-
-                        labels:
-                            data.trend.labels,
-
-                        datasets: [
-
-                            {
-
-                                label:
-                                    "Overall Score",
-
-                                data:
-                                    data.trend.overall,
-
-                                borderColor:
-                                    blue,
-
-                                backgroundColor:
-                                    gradient,
-
-                                borderWidth:
-                                    3,
-
-                                fill:
-                                    true,
-
-                                tension:
-                                    0.4,
-
-                                pointRadius:
-                                    6,
-
-                                pointHoverRadius:
-                                    9,
-
-                                pointBackgroundColor:
-                                    "#FFFFFF",
-
-                                pointBorderColor:
-                                    blue,
-
-                                pointBorderWidth:
-                                    3
-
-                            }
-
-                        ]
-
-                    },
-
-
-                    options: {
-
-                        responsive:
-                            true,
-
-                        maintainAspectRatio:
-                            false,
-
-
-                        interaction: {
-
-                            intersect:
-                                false,
-
-                            mode:
-                                "index"
-
-                        },
-
-
-                        plugins: {
-
-                            legend: {
-
-                                display:
-                                    false
-
-                            },
-
-
-                            tooltip: {
-
-                                backgroundColor:
-                                    "#071326",
-
-                                titleColor:
-                                    "#FFFFFF",
-
-                                bodyColor:
-                                    "#C5D2E8",
-
-                                borderColor:
-                                    "rgba(79,140,255,0.5)",
-
-                                borderWidth:
-                                    1,
-
-                                padding:
-                                    12,
-
-                                displayColors:
-                                    false,
-
-
-                                callbacks: {
-
-                                    label:
-                                        function(context) {
-
-                                            return (
-                                                " Score: " +
-                                                context.parsed.y
-                                            );
-
-                                        }
-
-                                }
-
-                            }
-
-                        },
-
-
-                        scales: {
-
-                            x: {
-
-                                ticks: {
-
-                                    color:
-                                        textColor,
-
-                                    maxRotation:
-                                        0,
-
-                                    padding:
-                                        8
-
-                                },
-
-                                grid: {
-
-                                    display:
-                                        false
-
-                                }
-
-                            },
-
-
-                            y: {
-
-                                min:
-                                    0,
-
-                                max:
-                                    100,
-
-                                ticks: {
-
-                                    color:
-                                        textColor,
-
-                                    stepSize:
-                                        20,
-
-                                    padding:
-                                        8
-
-                                },
-
-                                grid: {
-
-                                    color:
-                                        gridColor
-
-                                }
-
-                            }
-
-                        }
-
-                    }
-
-                });
-
-            }
-
-
-            /* =====================================
-               RADAR CHART
-            ====================================== */
-
-            const radarCanvas =
-                document.getElementById(
-                    "radarChart"
-                );
-
-
-            if (radarCanvas) {
-
-                const radarLabels =
-                    Object.keys(
-                        data.skill_radar
-                    );
-
-
-                const radarValues =
-                    Object.values(
-                        data.skill_radar
-                    );
-
-
-                new Chart(
-
-                    radarCanvas,
-
-                    {
-
-                        type:
-                            "radar",
-
-
-                        data: {
-
-                            labels:
-                                radarLabels,
-
-
-                            datasets: [
-
-                                {
-
-                                    label:
-                                        "Average Score",
-
-                                    data:
-                                        radarValues,
-
-                                    borderColor:
-                                        blueLight,
-
-                                    backgroundColor:
-                                        "rgba(79,140,255,0.16)",
-
-                                    borderWidth:
-                                        2,
-
-                                    pointBackgroundColor:
-                                        gold,
-
-                                    pointBorderColor:
-                                        "#FFFFFF",
-
-                                    pointBorderWidth:
-                                        2,
-
-                                    pointRadius:
-                                        5,
-
-                                    pointHoverRadius:
-                                        8
-
-                                }
-
-                            ]
-
-                        },
-
-
-                        options: {
-
-                            responsive:
-                                true,
-
-                            maintainAspectRatio:
-                                false,
-
-
-                            plugins: {
-
-                                legend: {
-
-                                    display:
-                                        false
-
-                                },
-
-
-                                tooltip: {
-
-                                    backgroundColor:
-                                        "#071326",
-
-                                    titleColor:
-                                        "#FFFFFF",
-
-                                    bodyColor:
-                                        "#C5D2E8",
-
-                                    borderColor:
-                                        "rgba(79,140,255,0.5)",
-
-                                    borderWidth:
-                                        1,
-
-                                    padding:
-                                        12,
-
-                                    displayColors:
-                                        false,
-
-
-                                    callbacks: {
-
-                                        label:
-                                            function(context) {
-
-                                                return (
-                                                    " Score: " +
-                                                    context.parsed.r
-                                                );
-
-                                            }
-
-                                    }
-
-                                }
-
-                            },
-
-
-                            scales: {
-
-                                r: {
-
-                                    min:
-                                        0,
-
-                                    max:
-                                        100,
-
-
-                                    ticks: {
-
-                                        display:
-                                            false
-
-                                    },
-
-
-                                    grid: {
-
-                                        color:
-                                            gridColor
-
-                                    },
-
-
-                                    angleLines: {
-
-                                        color:
-                                            gridColor
-
-                                    },
-
-
-                                    pointLabels: {
-
-                                        color:
-                                            textColor,
-
-                                        padding:
-                                            10,
-
-                                        font: {
-
-                                            size:
-                                                11,
-
-                                            weight:
-                                                "500"
-
-                                        }
-
-                                    }
-
-                                }
-
-                            }
-
-                        }
-
-                    }
-
-                );
-
-            }
-
-        })
-
-
-        .catch(function(error) {
-
-            console.error(
-                "Dashboard chart error:",
-                error
-            );
-
-        });
-
-});
-
+fetch("{{ url_for('dashboard.analytics_data') }}")
+  .then(r => r.json())
+  .then(data => {
+    const ink = '#9B9EB2';
+    const grid = 'rgba(255,255,255,0.06)';
+
+    new Chart(document.getElementById('trendChart'), {
+      type: 'line',
+      data: {
+        labels: data.trend.labels,
+        datasets: [{
+          label: 'Overall score',
+          data: data.trend.overall,
+          borderColor: '#E8A23D',
+          backgroundColor: 'rgba(232,162,61,0.12)',
+          tension: 0.35,
+          fill: true,
+          pointBackgroundColor: '#E8A23D',
+          pointRadius: 4,
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { min: 0, max: 100, ticks: { color: ink }, grid: { color: grid } },
+          x: { ticks: { color: ink }, grid: { display: false } }
+        }
+      }
+    });
+
+    const radarLabels = Object.keys(data.skill_radar);
+    const radarValues = Object.values(data.skill_radar);
+    new Chart(document.getElementById('radarChart'), {
+      type: 'radar',
+      data: {
+        labels: radarLabels,
+        datasets: [{
+          label: 'Average score',
+          data: radarValues,
+          borderColor: '#4FC8B8',
+          backgroundColor: 'rgba(79,200,184,0.18)',
+          pointBackgroundColor: '#4FC8B8',
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          r: {
+            min: 0, max: 100,
+            ticks: { display: false, backdropColor: 'transparent' },
+            grid: { color: grid },
+            angleLines: { color: grid },
+            pointLabels: { color: ink, font: { size: 11 } }
+          }
+        }
+      }
+    });
+  });
 </script>
-
 {% endif %}
-
 {% endblock %}
